@@ -1,3 +1,4 @@
+// --------------------- IN-DEPTH EXAMPLE ---------------------
 class LRUCache {
   constructor(maxSize) {
     this.maxSize = maxSize || 1;
@@ -102,7 +103,6 @@ const Node = class {
 };
 
 // --------------------- USING MAP JAVASCRIPT OBJECT ---------------------
-
 class LRUCache {
   constructor(capacity) {
     this.cache = new Map();
@@ -128,3 +128,100 @@ class LRUCache {
     }
   }
 }
+
+// --------------------- ADDITIONAL EXAMPLE ---------------------
+let Node = class {
+  constructor(value) {
+    this.value = value;
+    this.next = null;
+    this.prev = null;
+  }
+};
+
+let LRUCache = class {
+  constructor(capacity) {
+    this.capacity = capacity;
+    this.currentSize = 0;
+    this.hash = {};
+
+    this.head = new Node(null);
+    this.tail = new Node(null);
+
+    this.head.next = this.tail;
+    this.tail.prev = this.head;
+  }
+
+  printList() {
+    let str = this.head.value;
+    let currentNode = this.head;
+    while (currentNode.next) {
+      currentNode = currentNode.next;
+      str += `->${currentNode.value}`;
+    }
+    console.log(str);
+  }
+
+  get(key) {
+    console.log(`getting ${key}`);
+    if (key in this.hash) {
+      const n = this.hash[key];
+      this._removeNode(n);
+      this._addNode(n);
+
+      return n.value;
+    } else {
+      return -1;
+    }
+  }
+
+  put(key, value) {
+    console.log(`putting ${key}`);
+    if (key in this.hash) {
+      this._removeNode(this.hash[key]);
+    }
+
+    const n = new Node(value);
+    this._addNode(n);
+    this.hash[key] = n;
+
+    if (this.currentSize > this.capacity) {
+      const lruNode = this.head.next;
+      this._removeNode(lruNode);
+      delete this.hash[lruNode.value];
+    }
+    this.printList();
+  }
+
+  _removeNode(node) {
+    const prevNode = node.prev;
+    const nextNode = node.next;
+
+    prevNode.next = nextNode;
+    nextNode.prev = prevNode;
+
+    this.currentSize--;
+  }
+
+  _addNode(node) {
+    const lastNode = this.tail.prev;
+    lastNode.next = node;
+    this.tail.prev = node;
+
+    node.next = this.tail;
+    node.prev = lastNode;
+
+    this.currentSize++;
+  }
+};
+
+c = new LRUCache(2);
+
+c.put(1, 1);
+c.put(2, 2);
+console.log(c.get(1));
+c.put(3, 3);
+console.log(c.get(2));
+c.put(4, 4);
+console.log(c.get(1));
+console.log(c.get(3));
+console.log(c.get(4));
